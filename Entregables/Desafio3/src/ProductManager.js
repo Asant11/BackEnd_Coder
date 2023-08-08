@@ -73,10 +73,9 @@ async function run(){
     // console.log(await manager.addProduct('producto prueba 9', 'Este es un producto prueba', 200, 'Sin imagen', 'abc123', 25))
     // console.log(await manager.addProduct('producto prueba 10', 'Este es un producto prueba', 200, 'Sin imagen', 'abc123', 25))
 
-    // // console.log(await manager.getProducts()); 
-    // // console.log(await manager.getProductsById(1));
-    // // console.log(await manager.updateProduct(1, 'price', 250));
+    // console.log(await manager.getProducts()); 
+    // console.log(await manager.getProductsById(1));
+    // console.log(await manager.updateProduct(1, 'price', 250));
     // console.log(await manager.deleteProduct(2));
 }
 run()
-
