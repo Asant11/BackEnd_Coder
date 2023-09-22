@@ -5,7 +5,6 @@ import mongoose from 'mongoose';
 import { engine } from 'express-handlebars';
 import {__dirname} from './path.js'
 import { Server } from 'socket.io';
-// import { ProductManager } from './controllers/ProductManager.js';
 import productModel from './models/products.models.js';
 import messageModel from './models/messages.models.js';
 import routerProd from './routes/products.routes.js';
@@ -40,10 +39,12 @@ app.use(express.json())
 app.engine('handlebars', engine())
 app.set('view engine', 'handlebars')
 app.set('views', path.resolve(__dirname, './views'))
+
+
 app.use(session({
     secret: process.env.SESSION_SECRET,
-    resave: true,
-    saveUninitialized: true,
+    resave: false,
+    saveUninitialized: false,
     store: MongoStore.create({
         mongoUrl: process.env.MONGO_URL ,
         mongoOptions: {
@@ -53,6 +54,21 @@ app.use(session({
         
     }),
 }));
+
+function authAdmin(req, res, next) {
+    if (req.session.email == "admin@admin.com" && req.session.password == "coderhouse") {
+        return next()
+    } 
+    return res.send('No tenes acceso a este contenido')
+}
+
+
+const authUser = (req, res, next) => {
+    if (req.session.login) {
+        return next()
+    }
+    return res.send('Logueate para ver este contenido')
+}
 
 
 io.on("connection", (socket)=>{
@@ -98,7 +114,7 @@ app.use('/api/users', routerUsers)
 
 //Handlebars routes
 
-app.get('/static/realTimeProducts', (req, res) => {
+app.get('/static/realTimeProducts', authAdmin, (req, res) => {
     res.render("realTimeProducts", {
         title: "Real Time Users",
         rutaCSS: "realTimeProducts",
@@ -106,7 +122,7 @@ app.get('/static/realTimeProducts', (req, res) => {
     })
 })
 
-app.get('/static/home', (req, res) => {
+app.get('/static/home', authUser, (req, res) => {
     res.render("home", {
         title: "Home",
         rutaCSS: "home",
@@ -114,7 +130,7 @@ app.get('/static/home', (req, res) => {
     })
 })
 
-app.get('/static/chat', (req, res) => {
+app.get('/static/chat', authUser,(req, res) => {
     res.render("chat", {
         title: "Chat",
         rutaCSS: "chat",
@@ -122,7 +138,7 @@ app.get('/static/chat', (req, res) => {
     })
 })
 
-app.get('/api/sessions/login', (req, res)=>{
+app.get('/api/sessions/login', (req, res) =>{
     res.render("login",{
         title:"Login",
         rutaCSS: "login",
@@ -130,7 +146,7 @@ app.get('/api/sessions/login', (req, res)=>{
     })
 })
 
-app.get('/api/users/register', (req, res)=>{
+app.get('/api/users/register', (req, res) =>{
     res.render("register",{
         title:"Register",
         rutaCSS: "register",
@@ -138,7 +154,7 @@ app.get('/api/users/register', (req, res)=>{
     })
 })
 
-app.get('/static/profile', (req, res)=>{
+app.get('/static/profile', authUser, (req, res) =>{
     res.render("profile",{
         title: "Profile",
         rutaCSS: "profile",

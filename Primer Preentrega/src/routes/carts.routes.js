@@ -86,11 +86,12 @@ routerCart.put('/:cid/products/:pid', async(req, res) =>{
 
     try{
         const cart = await cartModel.findById(cid);
-        const product = cart.products.find(prod => prod.id_prod == pid);
+        const product = cart.products.find(prod => prod.id_prod.toString() === pid);
 
         if(product){
             product.quantity =+ quantity;
         } else{
+            cart.products.push({ id_prod: pid, quantity });
             res.status(404).send({result: 'NOT FOUND', message: cart});
         }
         await cart.save();

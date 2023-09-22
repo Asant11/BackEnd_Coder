@@ -9,17 +9,16 @@ routerSession.post('/login', async (req, res) =>{
 
     try{
         if(req.session.login){
-            //res.status(400).send({ resultado: 'Already logged in' });
+             //res.status(400).send({ resultado: 'Already logged in' });
             res.redirect('../../static/home')
         } else{
             const user = await userModel.findOne({email: email})
-            //Admin validation
-            user.email === "admin@admin.com" ? req.session.userRole = "admin" : req.session.userRole = "user";
-            
+
             if(user){
                 if(user.password == password){
                     req.session.login = true;
                     req.session.email = user.email;
+                    req.session.password = user.password
                     //res.status(200).send({result: 'OK', message: user})
                     res.redirect('../../static/home')
                 }else{
@@ -39,7 +38,7 @@ routerSession.get('/logout', (req, res)=>{
     if(req.session.login){
         try{
             req.session.destroy()
-            res.status(200).send({result: 'Logout was successfull'})
+            res.redirect('/api/sessions/login')
         } catch(e){
             res.status(400).send({error: `Logout error: ${e}`})
         }
