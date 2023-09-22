@@ -1,16 +1,12 @@
-import { CartManager } from "../controllers/CartManager.js";
 import { Router } from "express";
 import cartModel from "../models/carts.models.js";
 import productModel from "../models/products.models.js";
 
-const cartManager = new CartManager('./src/models/carts.json', './src/models/products.json');
 const routerCart = Router();
 
 routerCart.get('/', async(req, res) =>{
 
     const {limit} = req.query;
-    // const confirmation = await cartManager.getCarts();
-    // confirmation ? res.status(200).send(confirmation) : res.status(400).send('Carritos no encontrados')
 
     try{
         const carts = await cartModel.find().limit(limit);
@@ -23,8 +19,6 @@ routerCart.get('/', async(req, res) =>{
 routerCart.get('/:cid', async(req, res) =>{
     const {cid} = req.params;
     
-    // const findCart = await cartManager.getCartById(cid);
-    // findCart ? res.status(200).send(findCart) : res.status(400).send('El carrito solicitado no se encuentra');
 
     try{
         const cart = await cartModel.findById(cid);
@@ -35,8 +29,6 @@ routerCart.get('/:cid', async(req, res) =>{
 })
 
 routerCart.post('/', async (req, res) =>{
-    // const confirmation = await cartManager.addCart();
-    // confirmation ? res.status(200).send('Carrito creado correctamente') : res.status(400).send('Error al crear el carrito');
     try{
         const response = await cartModel.create({});
         res.status(200).send({result: 'OK', message: response})
@@ -46,8 +38,6 @@ routerCart.post('/', async (req, res) =>{
 })
 
 routerCart.post('/:cid/product/:pid', async(req, res) =>{
-    // const confirmation = await cartManager.addProductToCart(pid, cid);
-    // confirmation ? res.status(200).send('Producto agregado al carrito.') : res.status(400).send('No se ha podido agregar el producto.')
     const {cid, pid} = req.params;
     const cart = await cartModel.findById(cid);
     const product = await productModel.findById(pid);
@@ -115,7 +105,7 @@ routerCart.delete('/:cid/products/:pid', async (req, res)=>{
     try{
         const cart = await cartModel.findById(cid)
         if(cart){
-            const prod = cart.products.findIndex(prod => prod.id_prod == pid); 
+            const prod = cart.products.findIndex(prod => prod.id_prod._id == pid); 
             if(prod != -1){
                 const deletedProduct = cart.products.splice(prod, 1);
                 await cart.save()

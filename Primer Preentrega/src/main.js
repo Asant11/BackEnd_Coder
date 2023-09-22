@@ -11,6 +11,10 @@ import messageModel from './models/messages.models.js';
 import routerProd from './routes/products.routes.js';
 import routerCarts from './routes/carts.routes.js';
 import routerMessage from './routes/messages.routes.js';
+import routerSession from './routes/sessions.routes.js';
+import MongoStore from 'connect-mongo';
+import session from 'express-session';
+import routerUsers from './routes/users.routes.js';
 
 
 
@@ -36,6 +40,19 @@ app.use(express.json())
 app.engine('handlebars', engine())
 app.set('view engine', 'handlebars')
 app.set('views', path.resolve(__dirname, './views'))
+app.use(session({
+    secret: process.env.SESSION_SECRET,
+    resave: true,
+    saveUninitialized: true,
+    store: MongoStore.create({
+        mongoUrl: process.env.MONGO_URL ,
+        mongoOptions: {
+            useNewUrlParser: true,
+            useUnifiedTopology: true
+        },
+        
+    }),
+}));
 
 
 io.on("connection", (socket)=>{
@@ -52,7 +69,7 @@ io.on("connection", (socket)=>{
     })
 
     socket.on('load', async()=>{
-        const products = await productModel.find();
+        const products = await productModel.find().lean();
         socket.emit('getProducts', products );
     })
 
@@ -66,6 +83,7 @@ io.on("connection", (socket)=>{
 
 		io.emit('mensajes', messages);
 	});
+
 })
 
 
@@ -74,6 +92,8 @@ app.use('/static', express.static(path.join(__dirname, '/public')));
 app.use('/api/products', routerProd)
 app.use('/api/carts', routerCarts)
 app.use('/api/messages', routerMessage)
+app.use('/api/sessions', routerSession)
+app.use('/api/users', routerUsers)
 
 
 //Handlebars routes
@@ -86,7 +106,7 @@ app.get('/static/realTimeProducts', (req, res) => {
     })
 })
 
-app.get('/static', (req, res) => {
+app.get('/static/home', (req, res) => {
     res.render("home", {
         title: "Home",
         rutaCSS: "home",
@@ -99,6 +119,30 @@ app.get('/static/chat', (req, res) => {
         title: "Chat",
         rutaCSS: "chat",
         rutaJS: "chat"
+    })
+})
+
+app.get('/api/sessions/login', (req, res)=>{
+    res.render("login",{
+        title:"Login",
+        rutaCSS: "login",
+        rutaJS: "login"
+    })
+})
+
+app.get('/api/users/register', (req, res)=>{
+    res.render("register",{
+        title:"Register",
+        rutaCSS: "register",
+        rutaJS: "register"
+    })
+})
+
+app.get('/static/profile', (req, res)=>{
+    res.render("profile",{
+        title: "Profile",
+        rutaCSS: "profile",
+        rutaJS: "profile"
     })
 })
 

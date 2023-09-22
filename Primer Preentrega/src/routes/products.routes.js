@@ -1,8 +1,6 @@
 import {Router} from "express";
-import { ProductManager } from "../controllers/ProductManager.js";
 import productModel from "../models/products.models.js";
 
-// const productManager = new ProductManager('./src/models/products.json');
 const routerProd = Router();
 
 routerProd.get('/', async (req, res) =>{
@@ -23,10 +21,7 @@ routerProd.get('/', async (req, res) =>{
 	};
     
     const isQuery = query ? query : {};
-    // const products = await productManager.getProducts();
-    // const prodLimits = res.send(products.slice(0, limit));
-    // res.status(200).send(prodLimits);
-    
+
     try{
         const prods = await productModel.paginate(isQuery, options)
         res.status(200).send({result: 'OK', message: prods})
@@ -38,9 +33,6 @@ routerProd.get('/', async (req, res) =>{
 routerProd.get('/:pid', async (req, res) =>{
     const {pid} = req.params; 
     
-    // const prod = await productManager.getProductById(pid);
-    // prod ? res.status(200).send(prod) : res.status(400).send('El producto solicitado no se encuentra')
-
     try{
         const prod = await productModel.findById(pid)
         prod ? res.status(200).send({result: 'OK', message: prod}) : res.status(404).send({result: 'NOT FOUND', message: prod})
@@ -51,9 +43,6 @@ routerProd.get('/:pid', async (req, res) =>{
 
 routerProd.post('/', async (req, res) =>{
     const {title, description, stock, code, price, category} = req.body
-    
-    // const confirmation = await productManager.addProduct(req.body);
-    // confirmation ? res.status(200).send('Producto agregado correctamente') : res.status(400).send('Producto ya creado')
 
     try{
         const response = await productModel.create({title, description, stock, code, price, category})
@@ -63,11 +52,6 @@ routerProd.post('/', async (req, res) =>{
     }
 })
 
-// routerProd.put('/:pid', async (req, res) =>{
-//     const {pid} = req.params;
-//     const confirmation = await productManager.updateProduct(pid, req.body);
-//     confirmation ? res.status(200).send('Producto actualizado correctamente') : res.status(400).send('Producto no encontrado')
-// })
 
 routerProd.put('/:pid', async (req, res) =>{
     const {pid} = req.params; 
@@ -80,11 +64,7 @@ routerProd.put('/:pid', async (req, res) =>{
     }
 })
 
-// routerProd.delete('/:pid', async (req, res) =>{
-//     const {pid} = req.params
-//     const confirmation = await productManager.deleteProduct(pid);
-//     confirmation ? res.status(200).send('Producto eliminado correctamente') : res.status(400).send('Producto no encontrado')
-// })
+
 
 routerProd.delete('/:pid', async (req, res) =>{
     const {pid} = req.params;

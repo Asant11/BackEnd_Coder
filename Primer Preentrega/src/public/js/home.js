@@ -6,12 +6,12 @@ socket.emit('load');
 
 socket.on('getProducts', (products) =>{
     container.innerHTML = '';
-    products.forEach(prod => {
+    products.forEach( (prod) => {
         container.innerHTML += `
         <div class="product">
-            <p>ID: ${prod.id}</p>
             <p>Title:  ${prod.title}</p>
             <p>Description: ${prod.description}</p>
+            <p>Category: ${prod.category}</p>
             <p>Price: ${prod.price}</p>
             <p>Status: ${prod.status}</p>
             <p>Code: ${prod.code}</p>
