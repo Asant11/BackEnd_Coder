@@ -2,6 +2,7 @@ import 'dotenv/config.js'
 import path from 'path';
 import express from 'express';
 import mongoose from 'mongoose';
+import passport from 'passport';
 import { engine } from 'express-handlebars';
 import {__dirname} from './path.js'
 import { Server } from 'socket.io';
@@ -14,6 +15,7 @@ import routerSession from './routes/sessions.routes.js';
 import MongoStore from 'connect-mongo';
 import session from 'express-session';
 import routerUsers from './routes/users.routes.js';
+import initializePassport from './config/passport.js';
 
 
 
@@ -33,13 +35,12 @@ const server = app.listen(PORT, () =>{
 const io = new Server(server)
 
 
-//Permite el uso de queries complejas para filtrar con varios parametros
+//Middlewares
 app.use(express.urlencoded({extended:true}))
 app.use(express.json())
 app.engine('handlebars', engine())
 app.set('view engine', 'handlebars')
 app.set('views', path.resolve(__dirname, './views'))
-
 
 app.use(session({
     secret: process.env.SESSION_SECRET,
@@ -54,6 +55,10 @@ app.use(session({
         
     }),
 }));
+
+initializePassport()
+app.use(passport.initialize())
+app.use(passport.session())
 
 function authAdmin(req, res, next) {
     if (req.session.email == "admin@admin.com" && req.session.password == "coderhouse") {
