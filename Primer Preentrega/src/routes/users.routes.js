@@ -2,19 +2,14 @@ import { Router } from "express";
 import  userModel  from "../models/users.models.js";
 import {createHash} from '../utils/bcrypt.js';
 import passport from "passport";
+import userController from "../controllers/user.controller.js";
 
 const routerUsers = Router();
 
 
-routerUsers.post('/register', passport.authenticate('register') ,async (req, res) =>{
-    try{
-        if(!req.user){
-            return res.status(400).send({message: 'User already exists'})
-        }
-        return res.status(200).send({message: 'User created'})
-    } catch(e){
-        res.status(500).send({message: `Register error: ${e} `})
-    }
-})
+routerUsers.post('/register', passport.authenticate('register'), userController.postUser
+)
+
+routerUsers.get('/', userController.getUser)
 
 export default routerUsers;

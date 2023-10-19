@@ -1,5 +1,6 @@
 import 'dotenv/config.js'
 import path from 'path';
+import cookieParser from 'cookie-parser'
 import express from 'express';
 import mongoose from 'mongoose';
 import passport from 'passport';
@@ -8,14 +9,10 @@ import {__dirname} from './path.js'
 import { Server } from 'socket.io';
 import productModel from './models/products.models.js';
 import messageModel from './models/messages.models.js';
-import routerProd from './routes/products.routes.js';
-import routerCarts from './routes/carts.routes.js';
-import routerMessage from './routes/messages.routes.js';
-import routerSession from './routes/sessions.routes.js';
 import MongoStore from 'connect-mongo';
 import session from 'express-session';
-import routerUsers from './routes/users.routes.js';
 import initializePassport from './config/passport.js';
+import router from './routes/main.routes.js';
 
 
 
@@ -38,6 +35,7 @@ const io = new Server(server)
 //Middlewares
 app.use(express.urlencoded({extended:true}))
 app.use(express.json())
+app.use(cookieParser(process.env.JWT_SECRET))
 app.engine('handlebars', engine())
 app.set('view engine', 'handlebars')
 app.set('views', path.resolve(__dirname, './views'))
@@ -59,21 +57,6 @@ app.use(session({
 initializePassport()
 app.use(passport.initialize())
 app.use(passport.session())
-
-function authAdmin(req, res, next) {
-    if (req.session.email == "admin@admin.com" && req.session.password == "coderhouse") {
-        return next()
-    } 
-    return res.send('No tenes acceso a este contenido')
-}
-
-
-const authUser = (req, res, next) => {
-    if (req.session.login) {
-        return next()
-    }
-    return res.send('Logueate para ver este contenido')
-}
 
 
 io.on("connection", (socket)=>{
@@ -110,16 +93,13 @@ io.on("connection", (socket)=>{
 
 //Routes
 app.use('/static', express.static(path.join(__dirname, '/public')));
-app.use('/api/products', routerProd)
-app.use('/api/carts', routerCarts)
-app.use('/api/messages', routerMessage)
-app.use('/api/sessions', routerSession)
-app.use('/api/users', routerUsers)
+app.use('/', router)
+
 
 
 //Handlebars routes
 
-app.get('/static/realTimeProducts', authAdmin, (req, res) => {
+app.get('/static/realTimeProducts', (req, res) => {
     res.render("realTimeProducts", {
         title: "Real Time Users",
         rutaCSS: "realTimeProducts",
@@ -127,7 +107,7 @@ app.get('/static/realTimeProducts', authAdmin, (req, res) => {
     })
 })
 
-app.get('/static/home', authUser, (req, res) => {
+app.get('/static/home', (req, res) => {
     res.render("home", {
         title: "Home",
         rutaCSS: "home",
@@ -135,7 +115,7 @@ app.get('/static/home', authUser, (req, res) => {
     })
 })
 
-app.get('/static/chat', authUser,(req, res) => {
+app.get('/static/chat',(req, res) => {
     res.render("chat", {
         title: "Chat",
         rutaCSS: "chat",
@@ -159,7 +139,7 @@ app.get('/api/users/register', (req, res) =>{
     })
 })
 
-app.get('/static/profile', authUser, (req, res) =>{
+app.get('/static/profile', (req, res) =>{
     res.render("profile",{
         title: "Profile",
         rutaCSS: "profile",

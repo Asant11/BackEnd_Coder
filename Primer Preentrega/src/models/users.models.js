@@ -1,5 +1,5 @@
 import { Schema, model } from "mongoose";
-
+import cartModel from "./carts.models.js";
 const userSchema = new Schema({
     first_name: {
         type: String,
@@ -26,6 +26,21 @@ const userSchema = new Schema({
     rol: {
         type: String,
         default: 'user'
+    },
+    cart: {
+        type: Schema.Types.ObjectId,
+        ref: 'carts'
+    }
+})
+
+userSchema.pre('save', async function(next) {
+    if(!this.cart){
+        try{
+            const newCart = await cartModel.create({})
+            this.carrito = newCart._id
+        }catch(e){
+            next(e)
+        }
     }
 })
 
