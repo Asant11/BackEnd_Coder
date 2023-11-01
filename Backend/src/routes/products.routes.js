@@ -9,7 +9,7 @@ routerProd.get('/', productController.getProducts)
 
 routerProd.get('/:pid', productController.getProduct)
 
-routerProd.post('/', passportError('jwt'), authorization('user'), productController.postProduct)
+routerProd.post('/', passportError('jwt'), authorization('admin'), productController.postProduct)
 
 routerProd.put('/:pid',  passportError('jwt'), authorization('admin'), productController.putProduct)
 

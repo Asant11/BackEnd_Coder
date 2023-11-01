@@ -10,13 +10,13 @@ routerCart.get('/:cid', cartController.getCart)
 
 routerCart.post('/', cartController.postCart)
 
-routerCart.post('/:cid/product/:pid', cartController.postProductToCart)
+routerCart.post('/:cid/product/:pid', passportError('jwt'), authorization('user'),cartController.postProductToCart)
 
 routerCart.post('/:cid/purchase', cartController.cartPurchase)
 
 routerCart.put('/:cid', cartController.putCart)
 
-routerCart.put('/:cid/products/:pid', cartController.putProductToCart)
+routerCart.put('/:cid/products/:pid', passportError('jwt'), authorization('user'),cartController.putProductToCart)
 
 routerCart.delete('/:cid/products/:pid', cartController.deleteProductFromCart)
 

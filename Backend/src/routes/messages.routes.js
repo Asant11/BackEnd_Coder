@@ -5,6 +5,6 @@ const routerMessage = Router();
 
 routerMessage.get('/', messageController.getMessages);
 
-routerMessage.post('/', messageController.postMessage);
+routerMessage.post('/', passportError('jwt'), authorization('admin'), messageController.postMessage);
 
 export default routerMessage;
