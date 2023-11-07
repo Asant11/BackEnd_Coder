@@ -1,5 +1,8 @@
 import productModel from "../models/products.models.js";
 import { generateProducts } from "../utils/utils.js";
+import CustomError from '../services/errors/CustomError.js'
+import EErrors from '../services/errors/enums.js'
+import {generateProductErrorInfo} from '../services/errors/info.js'
 
 const getProducts = async(req, res) =>{
 
@@ -34,10 +37,26 @@ const getProduct = async(req, res) =>{
     }
 }
 
+const validateProductData = (product) =>{
+    const requiredFields = ['title', 'description', 'stock', 'code', 'price', 'category']
+
+    for(let field of requiredFields){
+        if(!product[field]){
+            throw CustomError.createError({
+                name: 'Product validation error',
+                cause: generateProductErrorInfo({title, description, stock, code, price, category}),
+                message: 'Error trying to validate product',
+                code: EErrors.MISSING_FIELDS_ERROR
+            })
+        }
+    }
+}
+
 const postProduct = async(req, res) =>{
     const {title, description, stock, code, price, category} = req.body
 
     try{
+        validateProductData(req.body)
         const product = await productModel.create({title, description, stock, code, price, category})
         if(product){
             res.status(201).send(product) 
@@ -56,6 +75,7 @@ const putProduct = async (req, res) =>{
     const {pid} = req.params; 
     const {title, description, stock, code, price, category, status} = req.body
     try{
+        validateProductData(req.body)
         const response = await productModel.findByIdAndUpdate(pid, {title, description, stock, code, price, category, status})
         response ? res.status(200).send({result: 'OK', message: response}) : res.status(404).send({result: 'NOT FOUND', message: response})
     } catch (e){

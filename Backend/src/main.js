@@ -14,6 +14,7 @@ import MongoStore from 'connect-mongo';
 import session from 'express-session';
 import initializePassport from './config/passport.js';
 import router from './routes/main.routes.js';
+import errorHandler from './middlewares/errors/errorHandler.js';
 
 
 const whiteList = ['http://127.0.0.1:5173 ']
@@ -48,6 +49,7 @@ app.use(cors(corsOptions))
 app.use(express.urlencoded({extended:true}))
 app.use(express.json())
 app.use(cookieParser(process.env.JWT_SECRET))
+app.use(errorHandler);
 app.engine('handlebars', engine())
 app.set('view engine', 'handlebars')
 app.set('views', path.resolve(__dirname, './views'))
