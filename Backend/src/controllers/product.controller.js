@@ -1,4 +1,5 @@
 import productModel from "../models/products.models.js";
+import { generateProducts } from "../utils/utils.js";
 
 const getProducts = async(req, res) =>{
 
@@ -72,12 +73,22 @@ const deleteProduct = async(req, res) =>{
     }
 }
 
+const mockProducts = async(req, res) =>{
+    let products = [];
+
+    for(let i=0; i<100; i++){
+        products.push(generateProducts())
+    }
+    res.status(200).send({payload: products})
+}
+
 const productController = {
     getProduct,
     getProducts,
     postProduct,
     putProduct,
-    deleteProduct
+    deleteProduct,
+    mockProducts
 }
 
 export default productController;
