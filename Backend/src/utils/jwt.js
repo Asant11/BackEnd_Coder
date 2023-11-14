@@ -1,5 +1,6 @@
 import jwt from 'jsonwebtoken'
 import 'dotenv/config.js'
+import logger from '../utils/logger.js';
 
 export const generateToken = (user) => {
     const token = jwt.sign({user}, process.env.JWT_SECRET, {expiresIn: '12h'});
@@ -15,6 +16,7 @@ export const authToken = (req, res, next) => {
 
     jwt.sign(token, process.env.JWT_SECRET, (error, credentials)=>{
         if(error){
+            logger.error(error)
             res.status(403).send({error: 'Not authorized user'})
         }
         req.user = credentials.user

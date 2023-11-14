@@ -1,7 +1,8 @@
 import EErrors from "../../services/errors/enums.js";
+import logger from '../../utils/logger.js'
 
 export default (error, req, res, next) => {
-    console.log(error.message);
+    logger.info(error.message);
     switch (error.code) {
         case EErrors.MISSING_FIELDS_ERROR:
             res.status(400).send({ status: "error", error: error.name });

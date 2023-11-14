@@ -1,4 +1,5 @@
 import 'dotenv/config.js'
+import logger from '../src/utils/logger.js'
 import cors from 'cors'
 import path from 'path';
 import cookieParser from 'cookie-parser'
@@ -34,12 +35,12 @@ const app = express();
 const PORT = 4000;
 
 mongoose.connect(process.env.MONGO_URL)
-.then(() => console.log("DB Connected"))
-.catch((e) => console.log("Connection error: ", e))
+.then(() => logger.info("DB Connected"))
+.catch((e) => logger.info("Connection error: ", e))
 
 //Correr el servidor
 const server = app.listen(PORT, () =>{
-    console.log(`Corriendo el servidor en el puerto ${PORT}`);
+    logger.info(`Corriendo el servidor en el puerto ${PORT}`);
 })
 const io = new Server(server)
 
@@ -74,7 +75,7 @@ app.use(passport.session())
 
 
 io.on("connection", (socket)=>{
-    console.log('Conexion con socket hecha');
+    logger.info('Conexion con socket hecha');
 
     socket.on('newProduct', async (prod)=>{
         await productModel.create(prod);

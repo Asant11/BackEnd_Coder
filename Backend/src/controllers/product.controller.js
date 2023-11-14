@@ -3,6 +3,7 @@ import { generateProducts } from "../utils/utils.js";
 import CustomError from '../services/errors/CustomError.js'
 import EErrors from '../services/errors/enums.js'
 import {generateProductErrorInfo} from '../services/errors/info.js'
+import logger from '../utils/logger.js';
 
 const getProducts = async(req, res) =>{
 
@@ -22,6 +23,7 @@ const getProducts = async(req, res) =>{
         }
         
     } catch (e){
+        logger.error(e)
         res.status(500).send({error: `Error al consultar productos: ${e}` })
     }
 }
@@ -33,6 +35,7 @@ const getProduct = async(req, res) =>{
         const prod = await productModel.findById(pid)
         prod ? res.status(200).send({result: 'OK', message: prod}) : res.status(404).send({result: 'NOT FOUND', message: prod})
     } catch (e){
+        logger.error(e)
         res.status(400).send({error: `Error al consultar producto: ${e}` })
     }
 }
@@ -66,6 +69,7 @@ const postProduct = async(req, res) =>{
         if(e.code == 11000){
             return res.status(400).send({error: 'Duplicated key!'})
         } else{
+            logger.error(e)
             res.status(500).send({error: `Error al crear producto: ${e}`})
         }
     }
@@ -79,6 +83,7 @@ const putProduct = async (req, res) =>{
         const response = await productModel.findByIdAndUpdate(pid, {title, description, stock, code, price, category, status})
         response ? res.status(200).send({result: 'OK', message: response}) : res.status(404).send({result: 'NOT FOUND', message: response})
     } catch (e){
+        logger.error(e)
         res.status(400).send({error: `Error al actualizar producto: ${e}` })
     }
 }
@@ -89,6 +94,7 @@ const deleteProduct = async(req, res) =>{
         const response = await productModel.findByIdAndDelete(pid)
         response ? res.status(200).send({result: 'OK', message: response}) : res.status(404).send({result: 'NOT FOUND', message: response})
     } catch (e){
+        logger.error(e)
         res.status(400).send({error: `Error al eliminar producto: ${e}` })
     }
 }

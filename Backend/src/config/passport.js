@@ -1,4 +1,5 @@
 import 'dotenv/config.js'
+import logger from '../utils/logger.js'
 import local from 'passport-local';
 import passport from 'passport';
 import GithubStrategy from 'passport-github2';
@@ -26,13 +27,13 @@ const initializePassport = () => {
         try{
             return done(null, jwt_payload)
         } catch(e){
+            logger.error(e)
             return done(e)
         }
     }
     ))
     passport.use('register', new LocalStrategy(
         {passReqToCallback: true, usernameField: 'email'}, async (req, username, password, done) => {
-            //asdasd
             const {first_name, last_name, email, age} = req.body
             try{
                 const user = await userModel.findOne({email: email})
@@ -49,6 +50,7 @@ const initializePassport = () => {
                 })
                 return done(null, userCreated)
             } catch(e){
+                logger.error(e)
                 return done(e)
             }
         }
@@ -67,6 +69,7 @@ const initializePassport = () => {
 
             return done(null, false)
         } catch(e){
+            logger.error(e)
             return done(e)
         }
     }))
@@ -77,8 +80,8 @@ const initializePassport = () => {
         callbackUrl: process.env.CALLBACK_URL   
     }, async(accessToken, refreshToken, profile, done) =>{
         try{
-            console.log(accessToken)
-            console.log(refreshToken)
+            logger.info(accessToken)
+            logger.info(refreshToken)
             const user = await userModel.findOne({email: profile._json.email})
 
             if (!user) {
@@ -95,6 +98,7 @@ const initializePassport = () => {
                 done(null, user)
             }
         }catch(e){
+            logger.error(e)
             done(e)
         }
         

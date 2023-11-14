@@ -2,6 +2,7 @@ import { generateToken } from "../utils/jwt.js";
 import CustomError from '../services/errors/CustomError.js'
 import EErrors from '../services/errors/enums.js'
 import {generateUserErrorInfo} from '../services/errors/info.js'
+import logger from '../utils/logger.js';
 
 const validateUserData = (user) =>{
     const requiredFields = ['first_name', 'last_name', 'email', 'age', 'password']
@@ -30,6 +31,7 @@ const postLogin= async (req,res) =>{
         })
         res.status(200).send({token})
     } catch(e){
+        logger.error(e)
         res.status(500).send({message: `Login error: ${e}`})
     }
 }
@@ -53,7 +55,8 @@ const getLogout = async(req, res) =>{
         res.clearCookie('jwtCookie')
         res.redirect('/api/sessions/login')
     }else{
-    res.status(404).send({error: `Session not found: ${e}`})
+        logger.error(e)
+        res.status(404).send({error: `Session not found: ${e}`})
     }
 }
 
@@ -65,6 +68,7 @@ const postUser = async(req, res) =>{
         }
         return res.status(200).send({message: 'User created'})
     } catch(e){
+        logger.error(e)
         res.status(500).send({message: `Register error: ${e} `})
     }
 }
