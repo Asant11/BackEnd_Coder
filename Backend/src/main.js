@@ -1,4 +1,5 @@
 import 'dotenv/config.js'
+import swaggerUiExpress from 'swagger-ui-express'
 import logger from '../src/utils/logger.js'
 import cors from 'cors'
 import path from 'path';
@@ -16,19 +17,20 @@ import session from 'express-session';
 import initializePassport from './config/passport.js';
 import router from './routes/main.routes.js';
 import errorHandler from './middlewares/errors/errorHandler.js';
+import { specs } from './config/swagger.js';
 
 
-const whiteList = ['http://127.0.0.1:5173 ']
+// const whiteList = ['http://127.0.0.1:5173 ']
 
-const corsOptions = {
-    origin: function (origin, callback){
-        if(whiteList.indexOf(origin) != -1 || origin){
-            callback(null, true)
-        } else{
-            callback(new Error("Denied access"))
-        }
-    }
-}
+// const corsOptions = {
+//     origin: function (origin, callback){
+//         if(whiteList.indexOf(origin) != -1 || origin){
+//             callback(null, true)
+//         } else{
+//             callback(new Error("Denied access"))
+//         }
+//     }
+// }
 
 
 const app = express();
@@ -46,7 +48,7 @@ const io = new Server(server)
 
 
 //Middlewares
-app.use(cors(corsOptions))
+// app.use(cors(corsOptions))
 app.use(express.urlencoded({extended:true}))
 app.use(express.json())
 app.use(cookieParser(process.env.JWT_SECRET))
@@ -108,6 +110,7 @@ io.on("connection", (socket)=>{
 
 //Routes
 app.use('/static', express.static(path.join(__dirname, '/public')));
+app.use('/apidocs', swaggerUiExpress.serve, swaggerUiExpress.setup(specs))
 app.use('/', router)
 
 

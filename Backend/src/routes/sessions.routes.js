@@ -7,6 +7,10 @@ const routerSession = Router();
 
 routerSession.post('/login', passport.authenticate('login'), sessionController.postLogin);
 
+routerSession.post('/password-recovery', sessionController.passwordRecovery);
+
+routerSession.post('/reset-password/:token', sessionController.resetPassword);
+
 routerSession.post('/register', passport.authenticate('register'), sessionController.postUser)
 
 routerSession.get('/logout', sessionController.getLogout)

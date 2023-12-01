@@ -7,15 +7,17 @@ import logger from '../utils/logger.js';
 
 const getProducts = async(req, res) =>{
 
-    const {limit, page, sort, filter} = req.query
+    const {limit, page, sort, category} = req.query
     
-    const fil = filter ? filter : {}
     const pag = page ? page : 1
     const lim = limit ? limit : 10
     const ord = sort == 'asc' ? 1 : -1
+    
+    const query = {}
+    if (category) query.category = category
 
     try{
-        const prods = await productModel.paginate({ category: fil }, { limit: lim, page: pag, sort: { price: ord } })
+        const prods = await productModel.paginate(query, { limit: lim, page: pag, sort: { price: ord } })
         if(prods){
             res.status(200).send(prods)
         } else{
@@ -23,7 +25,7 @@ const getProducts = async(req, res) =>{
         }
         
     } catch (e){
-        logger.error(e)
+        logger.error(e.message)
         res.status(500).send({error: `Error al consultar productos: ${e}` })
     }
 }
@@ -69,7 +71,7 @@ const postProduct = async(req, res) =>{
         if(e.code == 11000){
             return res.status(400).send({error: 'Duplicated key!'})
         } else{
-            logger.error(e)
+            logger.error(e.message)
             res.status(500).send({error: `Error al crear producto: ${e}`})
         }
     }
@@ -83,7 +85,7 @@ const putProduct = async (req, res) =>{
         const response = await productModel.findByIdAndUpdate(pid, {title, description, stock, code, price, category, status})
         response ? res.status(200).send({result: 'OK', message: response}) : res.status(404).send({result: 'NOT FOUND', message: response})
     } catch (e){
-        logger.error(e)
+        logger.error(e.message)
         res.status(400).send({error: `Error al actualizar producto: ${e}` })
     }
 }
@@ -94,7 +96,7 @@ const deleteProduct = async(req, res) =>{
         const response = await productModel.findByIdAndDelete(pid)
         response ? res.status(200).send({result: 'OK', message: response}) : res.status(404).send({result: 'NOT FOUND', message: response})
     } catch (e){
-        logger.error(e)
+        logger.error(e.message)
         res.status(400).send({error: `Error al eliminar producto: ${e}` })
     }
 }

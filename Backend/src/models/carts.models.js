@@ -18,10 +18,7 @@ const cartSchema = new Schema({
             default: function(){
                 return [];
             }
-        
-    }
-        
-    
+    }   
 })
 
 cartSchema.pre('find', function(){

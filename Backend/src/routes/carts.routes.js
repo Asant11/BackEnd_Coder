@@ -6,7 +6,6 @@ const routerCart = Router();
 
 routerCart.get('/', cartController.getCarts)
 
-
 routerCart.get('/:cid', cartController.getCart)
 
 routerCart.post('/', cartController.postCart)

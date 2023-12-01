@@ -2,6 +2,7 @@ import cartModel from "../models/carts.models.js";
 import productModel from "../models/products.models.js";
 import userModel from "../models/users.models.js";
 import logger from '../utils/logger.js';
+import 'dotenv/config.js'
 
 const getCarts = async(req, res) =>{
     const {limit} = req.query;
@@ -10,7 +11,7 @@ const getCarts = async(req, res) =>{
         const carts = await cartModel.find().limit(limit);
         res.status(200).send({result: 'OK', message: carts});
     } catch(e){
-        logger.error(e)
+        logger.error(e.message)
         res.status(400).send({error: `Error al consultar el carrito: ${e}` });
     }
 }
@@ -23,7 +24,7 @@ const getCart = async(req, res) =>{
         const cart = await cartModel.findById(cid);
         cart ? res.status(200).send({result: 'OK', message: cart}) : res.status(404).send({result: 'NOT FOUND', message: cart});
     } catch(e){
-        logger.error(e)
+        logger.error(e.message)
         res.status(400).send({error:`Error al encontrar el carrito: ${e}`});
     }
 }
@@ -46,7 +47,11 @@ const cartPurchase = async(req, res) =>{
             cart.products.forEach(item => {
                 const prodInStock = products.find(prod => prod.id == item.id_prod.toString());
                 if(prodInStock.stock >= item.quantity){
-                    amount += prodInStock.price * item.quantity;
+                    if (userModel.rol === 'premium') {
+                        amount += prodInStock.price * item.quantity * process.env.PREMIUM_DISCOUNT;
+                    } else {
+                        amount += prodInStock.price * item.quantity;
+                    }
                     prodInStock.stock -= item.quantity
                     prodInStock.save()
                     cartProducts.push(prodInStock.title)
@@ -62,7 +67,7 @@ const cartPurchase = async(req, res) =>{
             res.status(404).send({error: 'Cart not found'})
         }
     } catch(e){
-        logger.error(e)
+        logger.error(e.message)
         res.status(400).send({error: `Getting cart error ${e}`})
     }
 }
@@ -72,7 +77,7 @@ const postCart = async(req, res) =>{
         const response = await cartModel.create({});
         res.status(200).send({result: 'OK', message: response})
     } catch(e){
-        logger.error(e)
+        logger.error(e.message)
         res.status(400).send({error: `Error al crear el carrito: ${e}`})
     }
 }
@@ -99,7 +104,7 @@ const postProductToCart = async (req, res) =>{
         await cart.save()
         res.status(200).send({result: 'OK', message: cart}) 
     } catch(e){
-        logger.error(e)
+        logger.error(e.message)
         res.status(400).send(`Error al agregar el producto: ${e}`);
     }   
 }
@@ -117,7 +122,7 @@ const putCart= async(req, res) =>{
         await cart.save()
         cart ? res.status(200).send({result: 'OK', message: cart}) : res.status(404).send({result: 'NOT FOUND', message: cart});
     } catch(e){
-        logger.error(e)
+        logger.error(e.message)
         res.status(400).send(`Error al actualizar el carrito: ${e}`);
     }
 }
@@ -139,7 +144,7 @@ const putProductToCart = async(req, res) =>{
         await cart.save();
         res.status(200).send({result:'OK', message: cart});
     } catch(e){
-        logger.error(e)
+        logger.error(e.message)
         res.status(400).send(`Error al actualizar el producto: ${e}`);
     }
 }
@@ -161,7 +166,7 @@ const deleteProductFromCart = async(req, res) =>{
             res.status(404).send({result:'NOT FOUND', message: cart})
         }
     } catch(e){
-        logger.error(e)
+        logger.error(e.message)
         res.status(400).send({error: `Error al eliminar el producto: ${e}`})
     }
 }
@@ -173,7 +178,7 @@ const deleteCart = async(req, res) =>{
         await cart.save()
         cart ? res.status(200).send({result: 'OK', message: cart}) : res.status(404).send({result: 'NOT FOUND', message: cart});
     } catch (e){
-        logger.error(e)
+        logger.error(e.message)
         res.status(400).send({error: `Error al eliminar productos: ${e}` });
     }
 }

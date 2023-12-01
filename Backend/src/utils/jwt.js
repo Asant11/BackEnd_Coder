@@ -16,7 +16,7 @@ export const authToken = (req, res, next) => {
 
     jwt.sign(token, process.env.JWT_SECRET, (error, credentials)=>{
         if(error){
-            logger.error(error)
+            logger.error(error.message)
             res.status(403).send({error: 'Not authorized user'})
         }
         req.user = credentials.user
