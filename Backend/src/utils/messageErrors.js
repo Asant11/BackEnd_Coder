@@ -10,7 +10,7 @@ export const passportError = (strategy) =>{
             if(!user){
                 return res.status(401).send({error: info.messages ? info.messages : info.toString()})
             }
-            req.user = user
+            req.user = user;
             next()
         })(req, res, next)
     }
@@ -21,7 +21,7 @@ export const authorization = (rol) =>{
         if(!req.user){
             return res.status(401).send({error: 'Not authorized user'})
         }
-        if(req.user.user.rol != rol){
+        if(req.user.rol != rol){
             return res.status(401).send({error: 'User exists, but do not have permission'})
         }
 

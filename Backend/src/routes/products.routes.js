@@ -1,6 +1,7 @@
 import {Router} from "express";
 import { passportError, authorization } from "../utils/messageErrors.js";
 import productController from "../controllers/product.controller.js";
+import { authToken } from "../utils/jwt.js";
 
 const routerProd = Router();
 

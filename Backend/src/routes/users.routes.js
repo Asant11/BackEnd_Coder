@@ -1,9 +1,11 @@
 import { Router } from "express";
-import passport from "passport";
 import userController from "../controllers/user.controller.js";
+import { authorization } from "../utils/messageErrors.js";
 
 const routerUsers = Router();
 
-routerUsers.get('/', userController.getUser)
+routerUsers.get('/', userController.getUsers);
+
+routerUsers.get('/:uid', userController.getUser);
 
 export default routerUsers;

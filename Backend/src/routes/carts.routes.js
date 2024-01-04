@@ -8,18 +8,16 @@ routerCart.get('/', cartController.getCarts)
 
 routerCart.get('/:cid', cartController.getCart)
 
-routerCart.post('/', cartController.postCart)
-
 routerCart.post('/:cid/product/:pid', passportError('jwt'), authorization('user'),cartController.postProductToCart)
 
-routerCart.post('/:cid/purchase', cartController.cartPurchase)
+routerCart.post('/:cid/purchase', passportError('jwt'), authorization('user'), cartController.cartPurchase)
 
-routerCart.put('/:cid', cartController.putCart)
+routerCart.put('/:cid', authorization('user'), cartController.updateCartProducts)
 
-routerCart.put('/:cid/products/:pid', passportError('jwt'), authorization('user'),cartController.putProductToCart)
+routerCart.put('/:cid/products/:pid', passportError('jwt'), authorization('user'),cartController.updateQuantity)
 
-routerCart.delete('/:cid/products/:pid', cartController.deleteProductFromCart)
+routerCart.delete('/:cid/product/:pid', cartController.deleteProductFromCart)
 
-routerCart.delete('/:cid', cartController.deleteCart)
+routerCart.delete('/:cid', cartController.deleteCartProducts)
 
 export default routerCart;

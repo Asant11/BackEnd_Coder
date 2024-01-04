@@ -12,7 +12,7 @@ export const authToken = (req, res, next) => {
     if(!authHeader){
         return res.status(401).send({error: 'Not authenticated user'})
     }
-    const token = authHeader.split('')[1]
+    const token = authHeader.split(' ')[1]
 
     jwt.sign(token, process.env.JWT_SECRET, (error, credentials)=>{
         if(error){

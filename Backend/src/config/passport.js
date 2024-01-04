@@ -9,29 +9,34 @@ import userModel from '../models/users.models.js';
 
 const LocalStrategy = local.Strategy
 const JWTstrategy = jwt.Strategy
-const ExtractJWt = jwt.ExtractJwt
+const ExtractJWT = jwt.ExtractJwt
 
 
 const initializePassport = () => {
 
-    const cookieExtractor = req =>{
-
-        const token = req.headers.authorization ? req.headers.authorization : {}
+    const cookieExtractor = (req) => {
+        const token = req.cookies ? req.cookies.jwtCookie : {};
         return token
     }
 
+    const { fromAuthHeaderAsBearerToken } = ExtractJWT
+
     passport.use('jwt', new JWTstrategy({
-        jwtFromRequest: ExtractJWt.fromExtractors([cookieExtractor]), 
+        jwtFromRequest: ExtractJWT.fromExtractors([cookieExtractor, fromAuthHeaderAsBearerToken()]),
         secretOrKey: process.env.JWT_SECRET
-    }, async (jwt_payload, done) =>{
-        try{
-            return done(null, jwt_payload)
-        } catch(e){
-            logger.error(e.message)
-            return done(e)
+    }, async (jwtPayload, done) => {
+        try {
+            const user = await userModel.findById(jwtPayload.user._id)
+            if (!user) {
+                return done(null, false)
+            }
+            return done(null, user)
+        } catch (error) {
+            logger.error(error)
+            return done(error)
         }
-    }
-    ))
+    }))
+    
     passport.use('register', new LocalStrategy(
         {passReqToCallback: true, usernameField: 'email'}, async (req, username, password, done) => {
             const {first_name, last_name, email, age} = req.body

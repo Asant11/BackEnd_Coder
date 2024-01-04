@@ -9,10 +9,12 @@ const getCarts = async(req, res) =>{
 
     try{
         const carts = await cartModel.find().limit(limit);
-        res.status(200).send({result: 'OK', message: carts});
+
+        carts ? res.status(200).send({result: 'OK', message: carts}) : 
+        res.status(404).send('CARTS NOT FOUND')
     } catch(e){
         logger.error(e.message)
-        res.status(400).send({error: `Error al consultar el carrito: ${e}` });
+        res.status(400).send({error: `Getting carts error: ${e}` });
     }
 }
 
@@ -22,10 +24,10 @@ const getCart = async(req, res) =>{
     
     try{
         const cart = await cartModel.findById(cid);
-        cart ? res.status(200).send({result: 'OK', message: cart}) : res.status(404).send({result: 'NOT FOUND', message: cart});
+        cart ? res.status(200).send({result: 'OK', message: cart}) : res.status(404).send({result: 'CART NOT FOUND', message: cart});
     } catch(e){
         logger.error(e.message)
-        res.status(400).send({error:`Error al encontrar el carrito: ${e}`});
+        res.status(400).send({error:`Getting cart error: ${e}`});
     }
 }
 
@@ -33,21 +35,21 @@ const cartPurchase = async(req, res) =>{
     const {cid} = req.params
 
     try{
-        const products = await productModel.find() //Los productos de la BDD
+        const products = await productModel.find()
         const cart = await cartModel.findById(cid)
 
         if(cart){
-            //Si existe traigo el usuario asociado a ese carrito
-            const user = await userModel.find({ cart: cart._id });
-            const email = user[0].email;
+            const user = await userModel.findOne({ cart: cart._id._id });
+            const email = user.email;
             let amount = 0;
 
             const cartProducts = [];
-            //Comparo cada producto de la BDD con los del carrito
-            cart.products.forEach(item => {
-                const prodInStock = products.find(prod => prod.id == item.id_prod.toString());
+            cart.products.forEach(async item => {
+                
+                const prodInStock = products.find(prod => prod._id == item.id_prod.toString());
+
                 if(prodInStock.stock >= item.quantity){
-                    if (userModel.rol === 'premium') {
+                    if (user.rol === 'premium') {
                         amount += prodInStock.price * item.quantity * process.env.PREMIUM_DISCOUNT;
                     } else {
                         amount += prodInStock.price * item.quantity;
@@ -55,16 +57,12 @@ const cartPurchase = async(req, res) =>{
                     prodInStock.stock -= item.quantity
                     prodInStock.save()
                     cartProducts.push(prodInStock.title)
+                    await cartModel.findByIdAndUpdate(cid, { products: [] });
                 }
             })
-            await cartModel.findByIdAndUpdate(cid, {products: []})
-            const data = {
-                email : email,
-                amount: amount
-            }
-            res.status(200).send({message:cartProducts, data: data})
+            res.redirect( `http://localhost:4000/api/tickets/create?amount=${amount}&email=${email}`);
         } else{
-            res.status(404).send({error: 'Cart not found'})
+            res.status(404).send({error: 'CART NOT FOUND'})
         }
     } catch(e){
         logger.error(e.message)
@@ -72,15 +70,6 @@ const cartPurchase = async(req, res) =>{
     }
 }
 
-const postCart = async(req, res) =>{
-    try{
-        const response = await cartModel.create({});
-        res.status(200).send({result: 'OK', message: response})
-    } catch(e){
-        logger.error(e.message)
-        res.status(400).send({error: `Error al crear el carrito: ${e}`})
-    }
-}
 
 const postProductToCart = async (req, res) =>{
     const {cid, pid} = req.params;
@@ -88,9 +77,8 @@ const postProductToCart = async (req, res) =>{
     const product = await productModel.findById(pid);
 
     try{
-        //VALIDACIONES
         if(!product){
-            res.status(404).send({result: ' PRODUCT NOT FOUND', message: product});
+            res.status(404).send({result: 'PRODUCT NOT FOUND', message: product});
             return false;
         } 
         if(!cart){
@@ -98,54 +86,57 @@ const postProductToCart = async (req, res) =>{
             return false;
         } 
             
-        const existsProd = cart.products.find(prod => prod.id_prod == pid);
+        const existsProd = cart.products.find(prod => prod.id_prod._id == pid);
 
-        existsProd ? existsProd.quantity ++ : cart.products.push({id_prod, quantity: 1});
-        await cart.save()
-        res.status(200).send({result: 'OK', message: cart}) 
+        existsProd ? existsProd.quantity ++ : cart.products.push({id_prod: pid, quantity: 1});
+        await cart.save()                                                                                   
+        res.status(200).send({result: 'Product added succesfully!', message: cart}) 
     } catch(e){
         logger.error(e.message)
-        res.status(400).send(`Error al agregar el producto: ${e}`);
+        res.status(400).send(`Adding product error: ${e}`);
     }   
 }
 
-const putCart= async(req, res) =>{
+const updateCartProducts= async(req, res) =>{
     const {cid} = req.params;
-    const {products} = req.body;
-
+    const products = req.body;
     try{
         const cart = await cartModel.findById(cid);
-        products.forEach(prod =>{
-            const isProd = cart.products.find(cartProd => cartProd.id_prod == prod.id_prod)
-            isProd ? isProd.quantity += prod.quantity : cart.products.push(prod); 
+        products.forEach(product =>{
+            const isProd = cart.products.find(prod => prod.id_prod._id.equals(product.id_prod))
+            if(isProd){
+                isProd.quantity += product.quantity 
+            } else{
+                cart.products.push(prod); 
+            }
         });
         await cart.save()
-        cart ? res.status(200).send({result: 'OK', message: cart}) : res.status(404).send({result: 'NOT FOUND', message: cart});
+        cart ? res.status(200).send({result: 'Cart updated succesfully!', message: cart}) : 
+        res.status(404).send({result: 'NOT FOUND', message: cart});
     } catch(e){
         logger.error(e.message)
-        res.status(400).send(`Error al actualizar el carrito: ${e}`);
+        res.status(400).send(`Updating cart error: ${e}`);
     }
 }
 
-const putProductToCart = async(req, res) =>{
+const updateQuantity = async(req, res) =>{
     const {cid, pid} = req.params;
     const {quantity} = req.body;
 
     try{
         const cart = await cartModel.findById(cid);
-        const product = cart.products.find(prod => prod.id_prod.toString() === pid);
+        const product = cart.products.find(prod => prod.id_prod._id == pid);
 
         if(product){
             product.quantity =+ quantity;
         } else{
-            cart.products.push({ id_prod: pid, quantity });
-            res.status(404).send({result: 'NOT FOUND', message: cart});
+            cart.products.push({ id_prod: pid, quantity: quantity });
         }
         await cart.save();
-        res.status(200).send({result:'OK', message: cart});
+        res.status(200).send({result:'Quantity updated succesfully!', message: cart});
     } catch(e){
         logger.error(e.message)
-        res.status(400).send(`Error al actualizar el producto: ${e}`);
+        res.status(400).send(`Updating cart error: ${e}`);
     }
 }
 
@@ -158,41 +149,45 @@ const deleteProductFromCart = async(req, res) =>{
             if(prod != -1){
                 const deletedProduct = cart.products.splice(prod, 1);
                 await cart.save()
-                res.status(200).send({result: 'OK', message: cart, deletedProduct})
+                res.status(200).send({result: 'Product deleted succesfully!', message: cart, deletedProduct})
             } else{
-                res.status(404).send({result:'NOT FOUND', message: cart})
+                res.status(404).send({result:'PRODUCT NOT FOUND', message: cart})
             }
         } else{
             res.status(404).send({result:'NOT FOUND', message: cart})
         }
     } catch(e){
         logger.error(e.message)
-        res.status(400).send({error: `Error al eliminar el producto: ${e}`})
+        res.status(400).send({error: `Deleting product error: ${e}`})
     }
 }
 
-const deleteCart = async(req, res) =>{
+const deleteCartProducts = async(req, res) =>{
     const {cid} = req.params;
     try{
-        const cart = await cartModel.findByIdAndUpdate(cid, {products:[]});
-        await cart.save()
-        cart ? res.status(200).send({result: 'OK', message: cart}) : res.status(404).send({result: 'NOT FOUND', message: cart});
-    } catch (e){
-        logger.error(e.message)
-        res.status(400).send({error: `Error al eliminar productos: ${e}` });
+        const cart = await cartModel.findById(cid);
+        if(cart){
+            cart.products = [];
+            await cart.save()
+            res.status(200).send({result: 'Products deleted succesfully!', message: cart})
+        } else{
+            res.status(404).send({result: 'PRODUCT NOT FOUND', message: cart});
+        }
+        } catch (e){
+            logger.error(e.message)
+            res.status(400).send({error: `Deleting products error: ${e}` });
     }
 }
 
 const cartController = {
     getCarts,
     getCart,
-    postCart,
     cartPurchase,
     postProductToCart,
-    putCart,
-    putProductToCart,
+    updateCartProducts,
+    updateQuantity,
     deleteProductFromCart,
-    deleteCart
+    deleteCartProducts
 }
 
 export default cartController;

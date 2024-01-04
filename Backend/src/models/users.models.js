@@ -37,7 +37,7 @@ userSchema.pre('save', async function(next) {
     if(!this.cart){
         try{
             const newCart = await cartModel.create({})
-            this.carrito = newCart._id
+            this.cart = newCart._id
         }catch(e){
             next(e)
         }

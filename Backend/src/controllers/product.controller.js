@@ -5,6 +5,7 @@ import EErrors from '../services/errors/enums.js'
 import {generateProductErrorInfo} from '../services/errors/info.js'
 import logger from '../utils/logger.js';
 
+
 const getProducts = async(req, res) =>{
 
     const {limit, page, sort, category} = req.query
@@ -18,15 +19,12 @@ const getProducts = async(req, res) =>{
 
     try{
         const prods = await productModel.paginate(query, { limit: lim, page: pag, sort: { price: ord } })
-        if(prods){
-            res.status(200).send(prods)
-        } else{
-            res.status(404).send({error: 'Products do not exists'})
-        }
         
+        prods ? res.status(200).send(prods) : 
+        res.status(404).send({error: 'Products do not exist'})
     } catch (e){
         logger.error(e.message)
-        res.status(500).send({error: `Error al consultar productos: ${e}` })
+        res.status(500).send({error: `Getting products error: ${e}` })
     }
 }
 
@@ -35,10 +33,12 @@ const getProduct = async(req, res) =>{
     
     try{
         const prod = await productModel.findById(pid)
-        prod ? res.status(200).send({result: 'OK', message: prod}) : res.status(404).send({result: 'NOT FOUND', message: prod})
+        
+        prod ? res.status(200).send({result: 'OK', message: prod}) :  
+        res.status(404).send({result: 'NOT FOUND', message: prod})
     } catch (e){
         logger.error(e)
-        res.status(400).send({error: `Error al consultar producto: ${e}` })
+        res.status(400).send({error: `Getting product error:: ${e}` })
     }
 }
 
@@ -63,17 +63,12 @@ const postProduct = async(req, res) =>{
     try{
         validateProductData(req.body)
         const product = await productModel.create({title, description, stock, code, price, category})
-        if(product){
-            res.status(201).send(product) 
-        } 
-        res.status(404).send({error: "Producto no encontrado"})
+        
+        product ? res.status(201).send({result: 'Product created succesfully!', message: product}) :
+        res.status(404).send({error: "PRODUCT NOT FOUND"})
     } catch (e){
-        if(e.code == 11000){
-            return res.status(400).send({error: 'Duplicated key!'})
-        } else{
             logger.error(e.message)
-            res.status(500).send({error: `Error al crear producto: ${e}`})
-        }
+            res.status(500).send({error: `Posting product error: ${e}`})
     }
 }
 
@@ -83,10 +78,17 @@ const putProduct = async (req, res) =>{
     try{
         validateProductData(req.body)
         const response = await productModel.findByIdAndUpdate(pid, {title, description, stock, code, price, category, status})
-        response ? res.status(200).send({result: 'OK', message: response}) : res.status(404).send({result: 'NOT FOUND', message: response})
+        
+        if(response){
+            const updatedProd = await productModel.findById(pid)
+            res.status(200).send({result: 'Product updated succesfully!', message: updatedProd})
+        } else{
+            res.status(404).send({result: 'PRODUCT NOT FOUND', message: response})
+        }
+
     } catch (e){
         logger.error(e.message)
-        res.status(400).send({error: `Error al actualizar producto: ${e}` })
+        res.status(400).send({error: `Updating product error: ${e}` })
     }
 }
 
@@ -94,10 +96,11 @@ const deleteProduct = async(req, res) =>{
     const {pid} = req.params;
     try{
         const response = await productModel.findByIdAndDelete(pid)
-        response ? res.status(200).send({result: 'OK', message: response}) : res.status(404).send({result: 'NOT FOUND', message: response})
+        response ? res.status(200).send({result: 'Product deleted succesfully!', message: response}) : 
+        res.status(404).send({result: 'NOT FOUND', message: response})
     } catch (e){
         logger.error(e.message)
-        res.status(400).send({error: `Error al eliminar producto: ${e}` })
+        res.status(400).send({error: `Deleting product error: ${e}` })
     }
 }
 

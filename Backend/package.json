@@ -5,13 +5,18 @@
   "main": "main.js",
   "type": "module",
   "scripts": {
-    "dev": "nodemon src/main.js"
+    "dev": "nodemon src/main.js",
+    "test": "mocha --recursive",
+    "supertest" : "mocha test/supertest/Supertest.test.js"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "devDependencies": {
-    "nodemon": "^3.0.1"
+    "chai": "^4.3.10",
+    "mocha": "^10.2.0",
+    "nodemon": "^3.0.1",
+    "supertest": "^6.3.3"
   },
   "dependencies": {
     "@faker-js/faker": "^8.2.0",

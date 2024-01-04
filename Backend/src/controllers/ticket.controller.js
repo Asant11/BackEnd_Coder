@@ -25,11 +25,11 @@ const createTicket = async(req, res) =>{
             purchaser: email 
         }
         await ticketModel.create(ticket)
-        const newTicket = ticketModel.findOne({code: ticket.code})
-        res.status(201).send({response: 'Created ticket successfully', message: newTicket})
+        const newTicket = await ticketModel.findOne({code: ticket.code})
+        res.status(201).send({response: 'Ticket created successfully!', message: newTicket})
     } catch(e){
         logger.error(e)
-        res.status(400).send({error: `Error al crear el ticket: ${e}`})
+        res.status(400).send({error: `Error at new ticket: ${e}`})
     }
 }
 

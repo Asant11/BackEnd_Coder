@@ -3,9 +3,9 @@ import  ticketController  from "../controllers/ticket.controller.js";
 
 const ticketRouter = Router();
 
-ticketRouter.get('/', ticketController.getTickets)
+ticketRouter.get('/', ticketController.getTickets);
 
-ticketRouter.get('/create', ticketController.createTicket)
+ticketRouter.get('/create', ticketController.createTicket);
 
 export default ticketRouter;
 
