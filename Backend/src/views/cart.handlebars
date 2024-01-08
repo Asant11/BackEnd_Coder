@@ -1,0 +1,36 @@
+<main class="text-center">
+    <section class="container">
+        <h1>Carrito</h1>
+        <div>
+            <table class="table">
+            <thead>
+                <tr>
+                <th>#</th>
+                <th scope="col">Id del producto</th>
+                <th scope="col">Quantity</th>
+                <th scope="col">Price</th>
+                </tr>
+            </thead>
+            <tbody>
+                {{#each carts.products}}
+                    <tr>
+                        <th scope="row">1</th>
+                        <td>{{this.id_prod._id}}</td>
+                        <td>{{this.quantity}}</td>
+                        <td>{{this.id_prod.price}}</td>
+                    </tr>
+                {{/each}}
+            </tbody>
+            </table>
+            <span class="fw-bold my-3">Total price: ${{this.totalPrice}}</span>
+            <div class="d-flex align-items-center justify-content-center gap-2 my-2">
+                <form action="/api/products" method="GET" >
+                    <button class="btn btn-primary">Seguir comprando</button>
+                </form>
+                <form action="/api/carts/{{idCart}}" method="POST">
+                    <button class="btn btn-success">Finalizar compra</button>
+                </form>
+            </div>
+        </div>
+    </section>
+</main>

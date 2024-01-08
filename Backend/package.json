@@ -7,7 +7,7 @@
   "scripts": {
     "dev": "nodemon src/main.js",
     "test": "mocha --recursive",
-    "supertest" : "mocha test/supertest/Supertest.test.js"
+    "supertest": "mocha test/supertest/Supertest.test.js"
   },
   "keywords": [],
   "author": "",
@@ -21,6 +21,7 @@
   "dependencies": {
     "@faker-js/faker": "^8.2.0",
     "bcrypt": "^5.1.1",
+    "bootstrap-icons": "^1.11.3",
     "connect-mongo": "^5.0.0",
     "cookie-parser": "^1.4.6",
     "cors": "^2.8.5",
@@ -31,6 +32,7 @@
     "jsonwebtoken": "^9.0.2",
     "mongoose": "^7.5.0",
     "mongoose-paginate-v2": "^1.7.31",
+    "navigate": "^0.3.6",
     "nodemailer": "^6.9.7",
     "passport": "^0.6.0",
     "passport-github2": "^0.1.12",

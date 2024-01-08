@@ -1,7 +1,29 @@
 
-<h1>¡Bienvenido,{{user.first_name}} </h1>
-<button id="logOut"><a href="http://localhost:4000/api/sessions/logout">Log Out</a></button>
-<h2>Lista de productos</h2>
-
-    <div id="productsContainer">
+<section class="container-fluid">
+    <div class="text-center">
+        <h1 class="fw-bold">¡Bienvenido!</h1>
+        <h2>Lista de productos</h2>
     </div>
+    <div class=" prodContainer d-flex row row-cols-1 row-cols-md-3 g-4">
+        {{#each products}}
+            <div class="col">
+                <div class=" cardCol text-center" >
+                    <div class="card-header text-center fw-bold fs-3">{{this.title}}</div>
+                    <div class="card-body">
+                        <h5 class="card-subtitle fs-4 mb-2 text-body-secondary">ID:{{this.id}}</h5>
+                        <p class="card-text fw-semibold">{{this.description}}</p>
+                        <p class="card-text fw-bold">Price: ${{this.price}}</p>
+                        <div class="text-center justify-content-center align-items-center p-2 ">
+                            <form class="d-flex justify-content-center align-items-center flex-column"action="/api/carts/{{../cartId}}/product/{{this.id}}" method="POST">
+                                <label class="fw-bold"for="quantity">Cantidad:</label>
+                                <input class="quantity fw-bold" type="numeric" id="quantity" name="quantity" min="1" max="{{this.stock}}" value="1">
+                                <button class="btn btn-success mt-2" type="submit" id="agregarCarrito">Agregar al carrito</button>
+                            </form>
+                        </div>
+                        <div class="fw-semibold card-footer text-body-secondary">code:{{this.code}}</div>
+                    </div>
+                </div>
+            </div>  
+        {{/each}}
+    </div>
+</section>

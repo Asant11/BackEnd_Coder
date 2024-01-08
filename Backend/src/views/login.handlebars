@@ -1,11 +1,19 @@
-<h1>Log in</h1>
-    <form id="loginForm" action="http://localhost:4000/api/sessions/login" method="post">
-        <label for="email">Email:</label>
-        <input type="text" name="email" required>
+<div class="container-fluid background">
+<h1 class="text-center">Log in</h1>
+    <div class="d-flex justify-content-center align-items-center container-fluid">
+        <form class="form d-flex flex-column justify-content-center align-items-center "id="loginForm" action="http://localhost:3000/api/session/login" method="post">
+            <div class="d-flex flex-column text-center my-2 container">
+                <label class="fw-bold fs-3" for="email">Email:</label>
+                <input class="input" type="text" name="email" required>
+            </div>
 
-        <label for="password">Password:</label>
-        <input type="text" name="password" required>
+            <div class="d-flex flex-column text-center container my-2">
+                <label class="fw-bold fs-3"for="password">Password:</label>
+                <input class="input" type="password" name="password" required>
+            </div>
 
-        <button type="submit">Log In</button>
-    </form>
+            <button class="btn btn-success" type="submit" id="submitBtn">Log In</button>
+        </form> 
+    </div>
+</div>
 

@@ -32,14 +32,15 @@ const postLogin= async (req,res) =>{
         req.session.user = {
             first_name: req.user.first_name,
             last_name: req.user.last_name,
-            email:req.user.email,
-            age: req.user.age
+            email: req.user.email,
+            age: req.user.age,
+            cart : req.user.cart
         }
         const token = generateToken(req.user)
         res.cookie('jwtCookie', token, {
             maxAge: 43200000
         })
-        res.status(200).send({token})
+        res.redirect('/api/products')
     } catch(e){
         logger.error(e.message)
         res.status(500).send({message: `Login error: ${e}`})
@@ -117,7 +118,7 @@ const getLogout = async(req, res) =>{
     if(req.session){
         req.session.destroy()
         res.clearCookie('jwtCookie')
-        res.redirect('/api/sessions/login')
+        res.redirect('/api/session/login')
     }else{
         logger.error(e.message)
         res.status(404).send({error: `Session not found: ${e}`})
@@ -130,7 +131,7 @@ const postUser = async(req, res) =>{
         if(!req.user){
             return res.status(400).send({message: 'User already exists'})
         }
-        return res.status(200).send({message: 'User created'})
+        res.redirect('/api/session/login')
     } catch(e){
         logger.error(e.message)
         res.status(500).send({message: `Register error: ${e} `})

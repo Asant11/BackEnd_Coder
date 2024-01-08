@@ -7,6 +7,7 @@ import logger from '../utils/logger.js';
 
 
 const getProducts = async(req, res) =>{
+    const { user: { cart: cartId } = {} } = req.session;
 
     const {limit, page, sort, category} = req.query
     
@@ -20,8 +21,15 @@ const getProducts = async(req, res) =>{
     try{
         const prods = await productModel.paginate(query, { limit: lim, page: pag, sort: { price: ord } })
         
-        prods ? res.status(200).send(prods) : 
-        res.status(404).send({error: 'Products do not exist'})
+        if(prods){
+            res.render("home", {
+                rutaCSS: "home",
+                rutaJS: "home",
+                products: prods.docs,
+                cartId: cartId})
+        }else{
+            res.status(404).send({error: 'Products do not exist'})
+        }
     } catch (e){
         logger.error(e.message)
         res.status(500).send({error: `Getting products error: ${e}` })

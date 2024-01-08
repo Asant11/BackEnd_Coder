@@ -23,8 +23,22 @@ const getCart = async(req, res) =>{
     const {cid} = req.params;
     
     try{
-        const cart = await cartModel.findById(cid);
-        cart ? res.status(200).send({result: 'OK', message: cart}) : res.status(404).send({result: 'CART NOT FOUND', message: cart});
+        const cart = await cartModel.findById(cid).populate('products.id_prod')
+        let totalPrice = 0;
+        for(let prod of cart.products){
+            totalPrice += prod.id_prod.price * prod.quantity;
+        }
+
+        if(cart){
+            res.render("cart",{
+                rutaCSS: "cart",
+                carts: cart,
+                idCart: cid,
+                totalPrice: totalPrice
+            })
+        } else{
+            res.status(404).send({result: 'CART NOT FOUND', message: cart});
+        }
     } catch(e){
         logger.error(e.message)
         res.status(400).send({error:`Getting cart error: ${e}`});
@@ -40,7 +54,7 @@ const cartPurchase = async(req, res) =>{
 
         if(cart){
             const user = await userModel.findOne({ cart: cart._id._id });
-            const email = user.email;
+            const email = req.user.email;
             let amount = 0;
 
             const cartProducts = [];
@@ -60,7 +74,7 @@ const cartPurchase = async(req, res) =>{
                     await cartModel.findByIdAndUpdate(cid, { products: [] });
                 }
             })
-            res.redirect( `http://localhost:4000/api/tickets/create?amount=${amount}&email=${email}`);
+            res.redirect( `http://localhost:3000/api/tickets/create?amount=${amount}&email=${email}`);
         } else{
             res.status(404).send({error: 'CART NOT FOUND'})
         }
@@ -89,8 +103,9 @@ const postProductToCart = async (req, res) =>{
         const existsProd = cart.products.find(prod => prod.id_prod._id == pid);
 
         existsProd ? existsProd.quantity ++ : cart.products.push({id_prod: pid, quantity: 1});
-        await cart.save()                                                                                   
-        res.status(200).send({result: 'Product added succesfully!', message: cart}) 
+        const response = await cartModel.findByIdAndUpdate(cid, cart)     
+        if(response){
+            res.redirect(`/api/carts/${cid}`) }                                                             
     } catch(e){
         logger.error(e.message)
         res.status(400).send(`Adding product error: ${e}`);
@@ -171,7 +186,7 @@ const deleteCartProducts = async(req, res) =>{
             await cart.save()
             res.status(200).send({result: 'Products deleted succesfully!', message: cart})
         } else{
-            res.status(404).send({result: 'PRODUCT NOT FOUND', message: cart});
+            res.status(404).send({result: 'CART NOT FOUND', message: cart});
         }
         } catch (e){
             logger.error(e.message)

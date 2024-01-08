@@ -1,13 +1,12 @@
 import 'dotenv/config.js'
 import swaggerUiExpress from 'swagger-ui-express'
 import logger from '../src/utils/logger.js'
-import cors from 'cors'
 import path from 'path';
 import cookieParser from 'cookie-parser'
 import express from 'express';
 import mongoose from 'mongoose';
 import passport from 'passport';
-import { engine } from 'express-handlebars';
+import { ExpressHandlebars, engine } from 'express-handlebars';
 import {__dirname} from './path.js'
 import { Server } from 'socket.io';
 import productModel from './models/products.models.js';
@@ -20,21 +19,10 @@ import errorHandler from './middlewares/errors/errorHandler.js';
 import { specs } from './config/swagger.js';
 
 
-// const whiteList = ['http://127.0.0.1:5173 ']
 
-// const corsOptions = {
-//     origin: function (origin, callback){
-//         if(whiteList.indexOf(origin) != -1 || origin){
-//             callback(null, true)
-//         } else{
-//             callback(new Error("Denied access"))
-//         }
-//     }
-// }
-
-
+const expressHandlebars = ExpressHandlebars
 const app = express();
-const PORT = 4000;
+const PORT = 3000;
 
 mongoose.connect(process.env.MONGO_URL)
 .then(() => logger.info("DB Connected"))
@@ -48,12 +36,16 @@ const io = new Server(server)
 
 
 //Middlewares
-// app.use(cors(corsOptions))
 app.use(express.urlencoded({extended:true}))
 app.use(express.json())
 app.use(cookieParser(process.env.JWT_SECRET))
 app.use(errorHandler);
-app.engine('handlebars', engine())
+app.engine("handlebars", engine({
+    runtimeOptions: {
+        allowProtoPropertiesByDefault: true,
+        allowProtoMethodsByDefault: true,
+    }
+}))
 app.set('view engine', 'handlebars')
 app.set('views', path.resolve(__dirname, './views'))
 
@@ -109,7 +101,8 @@ io.on("connection", (socket)=>{
 
 
 //Routes
-app.use('/static', express.static(path.join(__dirname, '/public')));
+app.use('/', express.static(path.join(__dirname, '/public')));
+app.use(express.static('public'));
 app.use('/apidocs', swaggerUiExpress.serve, swaggerUiExpress.setup(specs))
 app.use('/', router)
 
@@ -125,13 +118,6 @@ app.get('/static/realTimeProducts', (req, res) => {
     })
 })
 
-app.get('/static/home', (req, res) => {
-    res.render("home", {
-        title: "Home",
-        rutaCSS: "home",
-        rutaJS: "home"
-    })
-})
 
 app.get('/static/chat',(req, res) => {
     res.render("chat", {
@@ -141,7 +127,7 @@ app.get('/static/chat',(req, res) => {
     })
 })
 
-app.get('/api/sessions/login', (req, res) =>{
+app.get('/api/session/login', (req, res) =>{
     res.render("login",{
         title:"Login",
         rutaCSS: "login",
@@ -149,25 +135,13 @@ app.get('/api/sessions/login', (req, res) =>{
     })
 })
 
-app.get('/api/users/register', (req, res) =>{
+app.get('/api/session/register', (req, res) =>{
     res.render("register",{
         title:"Register",
         rutaCSS: "register",
         rutaJS: "register"
     })
-})
 
-app.get('/static/profile', (req, res) =>{
-    res.render("profile",{
-        title: "Profile",
-        rutaCSS: "profile",
-        rutaJS: "profile"
-    })
-})
-
-
-app.get('/', (req, res) => {
-    res.send('Esta es la pagina inicial')
 })
 
 //Pagina error 404

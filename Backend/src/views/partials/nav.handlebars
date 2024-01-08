@@ -1,1 +1,13 @@
-<nav>Este es el nav</nav>
+<nav class="navbar bg-warning my-0">
+    <div class="container-fluid">
+        <span class="navbar-brand mb-0 h1">E-COMMERCE </span>
+        <div class="d-flex gap-3">
+            <form action="/api/sessions/logout" method="POST">
+                <button type="submit" class="btn btn-danger"><a class="text-decoration-none text-reset" href="http://localhost:3000/api/session/logout">Log Out</a></button>
+            </form>
+            <form class="" action="/api/carts/{{cartId}}">
+                <button class="btn btn-success" type="submit"><i class="bi bi-cart2" ></i></button>
+            </form>
+        </div>
+    </div>
+</nav>
