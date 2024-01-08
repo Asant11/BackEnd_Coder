@@ -1,26 +1,25 @@
 
 import swaggerUiExpress from 'swagger-ui-express'
-import logger from '../src/utils/logger.js'
+import logger from './src/utils/logger.js'
 import path from 'path';
 import cookieParser from 'cookie-parser'
 import express from 'express';
 import mongoose from 'mongoose';
 import passport from 'passport';
 import { ExpressHandlebars, engine } from 'express-handlebars';
-import {__dirname} from './path.js'
+import {__dirname} from './src/path.js'
 import { Server } from 'socket.io';
-import productModel from './models/products.models.js';
-import messageModel from './models/messages.models.js';
+import productModel from './src/models/products.models.js';
+import messageModel from './src/models/messages.models.js';
 import MongoStore from 'connect-mongo';
 import session from 'express-session';
-import initializePassport from './config/passport.js';
-import router from './routes/main.routes.js';
-import errorHandler from './middlewares/errors/errorHandler.js';
-import { specs } from './config/swagger.js';
+import initializePassport from './src/config/passport.js';
+import router from './src/routes/main.routes.js';
+import errorHandler from './src/middlewares/errors/errorHandler.js';
+import { specs } from './src/config/swagger.js';
 
 
 
-const expressHandlebars = ExpressHandlebars
 const app = express();
 const PORT = 3000;
 
