@@ -1,4 +1,4 @@
-import 'dotenv/config.js'
+
 import logger from '../utils/logger.js'
 import local from 'passport-local';
 import passport from 'passport';

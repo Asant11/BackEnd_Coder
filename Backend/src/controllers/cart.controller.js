@@ -2,7 +2,6 @@ import cartModel from "../models/carts.models.js";
 import productModel from "../models/products.models.js";
 import userModel from "../models/users.models.js";
 import logger from '../utils/logger.js';
-import 'dotenv/config.js'
 
 const getCarts = async(req, res) =>{
     const {limit} = req.query;

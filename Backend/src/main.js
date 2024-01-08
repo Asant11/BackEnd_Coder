@@ -1,4 +1,4 @@
-import 'dotenv/config.js'
+
 import swaggerUiExpress from 'swagger-ui-express'
 import logger from '../src/utils/logger.js'
 import path from 'path';

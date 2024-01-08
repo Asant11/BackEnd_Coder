@@ -1,5 +1,4 @@
 import jwt from 'jsonwebtoken'
-import 'dotenv/config.js'
 import logger from '../utils/logger.js';
 
 export const generateToken = (user) => {
